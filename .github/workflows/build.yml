@@ -48,7 +48,9 @@ jobs:
           if [ $rc -ne 0 ]; then echo "::error::导入失败: $chk"; exit 1; fi
           chk=$(docker exec tp-smoke sh -c 'exiftool -ver && fc-list :lang=zh | head -1' 2>&1); rc=$?
           if [ $rc -ne 0 ]; then echo "::error::依赖缺失: $chk"; exit 1; fi
-          echo "::notice::smoke ok [$state] $chk"
+          ren=$(docker exec tp-smoke python -c "from playwright.sync_api import sync_playwright as S; p=S().start(); b=p.chromium.launch(args=['--no-sandbox']); g=b.new_page(); g.set_content('<p>中文</p>'); g.screenshot(path='/tmp/x.png'); print('render ok')" 2>&1); rc=$?
+          if [ $rc -ne 0 ]; then echo "::error::截图失败: $(echo $ren | tail -c 1200)"; exit 1; fi
+          echo "::notice::smoke ok [$state] $(echo $chk | tr '\n' ' ') $ren"
           docker rm -f tp-smoke
       - name: push
         run: docker push $IMG:latest-${{ matrix.arch }}
