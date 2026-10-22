@@ -1,0 +1,43 @@
+{% extends "_base.html" %}
+{% block title %}每年去了哪儿{% endblock %}
+{% block body %}
+<div style="display:flex;justify-content:space-between;align-items:flex-end">
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <div class="kicker">旅行档案 · 年鉴篇 · {{ S.yearly[0].year }}—{{ S.y1 }}</div>
+    <h1 class="serif" style="font-size:96px">每年去了哪儿</h1>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:10px;align-items:flex-end;font-size:17px;color:var(--mute)">
+    <div class="legend" style="font-size:17px"><span><i style="background:#4c8dd3"></i>去了新地方</span><span><i style="background:#daac50"></i>都是去过的</span></div>
+    <span>一个圆点是一趟，越大走得越久</span>
+  </div>
+</div>
+
+{% set RH = S.row_h %}
+<div style="display:flex;flex-direction:column;gap:10px;flex:1;margin:56px 0 24px">
+  <div style="display:grid;grid-template-columns:110px 84px 84px 400px 1fr;gap:22px;font-size:16px;color:var(--mute);border-bottom:1px solid var(--line);padding-bottom:10px;align-items:end">
+    <span>年份</span><span>出行</span><span>在外</span>
+    <div style="position:relative;height:20px;font-size:14px;white-space:nowrap">{% for m in [1,4,7,10] %}<span style="position:absolute;left:{{ 10 + (m - 1) / 12 * 380 }}px">{{ m }}月</span>{% endfor %}</div>
+    <span>拍得最多的几趟</span>
+  </div>
+  <div style="position:relative;height:{{ RH * S.yearly|length }}px">
+    <div style="position:absolute;left:344px;top:0">{{ S.strip|safe }}</div>
+    <div style="display:grid;grid-template-rows:repeat({{ S.yearly|length }}, {{ RH }}px)">{% for r in S.yearly %}
+      {% set hot = (r.year == S.best_year.year) %}
+      <div style="display:grid;grid-template-columns:110px 84px 84px 400px 1fr;gap:22px;align-items:center;{% if not loop.last %}border-bottom:1px solid #1C2532{% endif %}">
+        <span class="serif" style="font-size:{{ [40, RH * 0.32]|min|int }}px{% if hot %};color:#f5aa42{% endif %}">{{ r.year }}</span>
+        <span style="font-size:18px"><b style="font-size:{{ [30, RH * 0.24]|min|int }}px{% if hot %};color:#f5aa42{% endif %}">{{ r.n }}</b> 趟</span>
+        <span style="font-size:18px"><b style="font-size:{{ [30, RH * 0.24]|min|int }}px{% if hot %};color:#f5aa42{% endif %}">{{ r.days }}</b> 天</span>
+        <span></span>
+        <div style="display:flex;flex-direction:column;gap:4px;font-size:17px;color:var(--mute);min-width:0">
+          {% for n in r.top[:(3 if RH >= 100 else 2 if RH >= 70 else 1)] %}<span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis{% if loop.first %};font-size:19px;color:var(--fg);font-weight:500{% endif %}">{{ n }}</span>{% endfor %}
+        </div>
+      </div>{% endfor %}
+    </div>
+  </div>
+</div>
+
+<div style="display:flex;justify-content:space-between;font-size:15px;color:var(--dim);border-top:1px solid var(--line);padding-top:14px">
+  <span>{{ S.best_year.year }} 年出行最多：{{ S.best_year.n }} 趟、{{ S.best_year.days }} 天</span>
+  <span>按照片和视频数排序</span>
+</div>
+{% endblock %}

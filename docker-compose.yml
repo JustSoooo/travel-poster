@@ -1,0 +1,13 @@
+# 绿联 UGOS Pro：Docker → 项目 → 创建，把下面内容粘进去。
+# 只需要改「照片文件夹」那一行（冒号左边换成你自己的照片文件夹路径），其他不用动。
+services:
+  travel-poster:
+    image: travel-poster:latest          # 用离线导入的镜像；能直接拉取的话也可以换成 ghcr.io/OWNER/travel-poster:latest
+    container_name: travel-poster
+    ports:
+      - "8090:8090"                       # 浏览器打开 http://NAS的IP:8090
+    volumes:
+      - /volume1/照片:/photos/照片:ro      # ← 照片文件夹（:ro = 只读，工具不会改动照片）
+      # - /volume1/手机备份:/photos/手机备份:ro   # 有多个照片文件夹就照这个格式再加几行
+      - ./data:/data                      # 扫描结果和生成的海报存在项目目录下的 data 文件夹
+    restart: unless-stopped

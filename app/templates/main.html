@@ -1,0 +1,78 @@
+{% extends "_base.html" %}
+{% block title %}{{ S.title_years }}年，在路上{% endblock %}
+{% block body %}
+<div style="display:flex;flex-direction:column;gap:14px">
+  <div class="kicker">旅行档案 · {{ S.y0 }}—{{ S.y1 }}</div>
+  <h1 class="serif">{{ S.title_years }}年，在路上</h1>
+  <div class="sub">{{ S.n_trips }} 次出发，{{ "{:,}".format(S.n_days) }} 天在路上</div>
+  <div class="small">{{ "%.1f"|format(S.n_photo/10000) if S.n_photo >= 10000 else "{:,}".format(S.n_photo) }}{{ " 万" if S.n_photo >= 10000 else " " }}张照片 · {{ "{:,}".format(S.n_video) }} 段视频</div>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="v serif">{{ S.n_trips }}</div><div class="k">次出行</div></div>
+  <div class="stat"><div class="v serif">{{ "{:,}".format(S.n_days) }}</div><div class="k">天在外</div></div>
+  <div class="stat"><div class="v serif">{{ S.n_cc }}</div><div class="k">个国家和地区</div></div>
+  {% if S.has_cn %}
+  <div class="stat"><div class="v serif">{{ S.n_prov }}<span style="color:var(--mute)">/34</span></div><div class="k">个省级行政区</div></div>
+  {% else %}
+  <div class="stat"><div class="v serif">{{ S.nyears }}</div><div class="k">年</div></div>
+  {% endif %}
+  <div class="stat"><div class="v serif">{{ S.n_city }}</div><div class="k">座城市</div></div>
+  <div class="stat"><div class="v serif">{% if S.km >= 10000 %}{{ "%.1f"|format(S.km/10000) }}<span>万</span>{% else %}{{ "{:,}".format(S.km|int) }}{% endif %}</div><div class="k">公里行程</div></div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px">
+  {{ S.map_main|safe }}
+  <div style="display:flex;justify-content:space-between;align-items:center;font-size:15px;color:var(--mute)">
+    <div style="display:flex;align-items:center;gap:12px"><span>首次到访</span>
+      <div style="display:flex;gap:4px">{% for y, c in S.year_colors[-15:] %}
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:{{ (520 / [S.year_colors|length, 15]|min)|int - 4 }}px;height:8px;border-radius:4px;background:{{ c }}"></div><span>{{ y % 100 }}</span></div>{% endfor %}
+      </div></div>
+    <span>圆点越大，停留越久</span>
+  </div>
+</div>
+
+{% if S.has_cn %}
+<div>
+  <div class="h2">省级行政区 · 首次到访</div>
+  <div class="grid7">{% for p, y in S.prov_grid %}
+    {% if y %}<div class="cell" style="height:66px"><div class="n" style="font-size:20px"><i class="dot" style="width:9px;height:9px;background:{{ S.year_color(y|int) }}"></i>{{ p }}</div><div class="d" style="font-size:14px">{{ y }}</div></div>
+    {% else %}<div class="cell off" style="height:66px"><div class="n" style="font-size:20px">{{ p }}</div><div class="d" style="font-size:14px">未至</div></div>{% endif %}
+  {% endfor %}</div>
+</div>
+{% endif %}
+
+<div>
+  <div class="h2">每年出行次数</div>
+  {% set mx = S.year_trips|map(attribute=1)|max %}
+  {% set bw = [32, (980 / S.year_trips|length * 0.6)|int]|min %}
+  <div class="bars" style="height:290px">{% for y, n in S.year_trips %}
+    <div class="bar"><span {% if n == mx %}style="color:var(--fg);font-weight:700"{% endif %}>{{ n }}</span><div style="width:{{ bw }}px;height:{{ (n / mx * 250)|round|int }}px;border-radius:4px 4px 0 0;background:{{ S.year_color(y) }}"></div></div>{% endfor %}
+  </div>
+  <div class="axis">{% for y, n in S.year_trips %}<span>{{ y % 100 }}</span>{% endfor %}</div>
+</div>
+
+{% if S.abroad %}
+<div>
+  <div class="h2">走出去 · 首次到访</div>
+  {% set groups = S.abroad|groupby(0) %}
+  <div style="position:relative">
+    <div style="position:absolute;left:0;right:0;top:52px;height:1px;background:var(--line)"></div>
+    <div style="position:relative;display:flex;justify-content:space-between;gap:10px">{% for y, items in groups[-8:] %}
+      <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
+        <div class="serif" style="font-size:30px;line-height:1">{{ y }}</div>
+        <div style="width:14px;height:14px;border-radius:50%;background:{{ S.year_color(y|int) }};border:4px solid var(--bg)"></div>
+        <div style="font-size:18px;line-height:1.55;color:var(--soft)">{% for _, n in items[:4] %}{{ n }}{% if not loop.last %}<br>{% endif %}{% endfor %}{% if items|length > 4 %}<br>等 {{ items|length }} 个{% endif %}</div>
+      </div>{% endfor %}
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<div class="facts">
+  <div class="fact"><div class="k">最北</div><div class="v">{{ S.north.city }} · {{ "%.1f"|format(S.north.lat|abs) }}°{{ "N" if S.north.lat >= 0 else "S" }}</div></div>
+  <div class="fact"><div class="k">最南</div><div class="v">{{ S.south.city }} · {{ "%.1f"|format(S.south.lat|abs) }}°{{ "N" if S.south.lat >= 0 else "S" }}</div></div>
+  <div class="fact"><div class="k">离家最远</div><div class="v">{{ S.far.city }}</div></div>
+  <div class="fact"><div class="k">拍得最多的一趟</div><div class="v">{{ S.top_trip.name }} · {{ "{:,}".format(S.top_trip.n) }} 张</div></div>
+</div>
+{% endblock %}

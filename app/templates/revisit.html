@@ -1,0 +1,77 @@
+{% extends "_base.html" %}
+{% block title %}一去再去{% endblock %}
+{% block body %}
+<div style="display:flex;flex-direction:column;gap:14px">
+  <div class="kicker">旅行档案 · 重访篇 · {{ S.y0 }}—{{ S.y1 }}</div>
+  <h1 class="serif">一去再去</h1>
+  <div class="sub">{{ S.n_trips }} 次出发，{{ S.n_rev }} 次回到了去过的地方</div>
+  <div class="legend"><span>到访次数</span>{% for k, c in S.bins %}<span><i style="background:{{ c }}"></i>{{ k }}</span>{% endfor %}</div>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="v serif">{{ S.n_rep }}</div><div class="k">座城市去过不止一次</div></div>
+  <div class="stat"><div class="v serif">{{ S.rev_share }}<span>%</span></div><div class="k">的出行是重访</div></div>
+  <div class="stat"><div class="v serif">{{ S.rep_day_share }}<span>%</span></div><div class="k">的在外天数在老地方</div></div>
+  <div class="stat"><div class="v serif">{{ S.top_city[1] }}</div><div class="k">次去{{ S.top_city[0] }}</div></div>
+  {% if S.top_prov[0] %}<div class="stat"><div class="v serif">{{ S.top_prov[1] }}<span style="color:var(--mute)">/{{ S.nyears }}</span></div><div class="k">年都去了{{ S.top_prov[0] }}</div></div>{% endif %}
+  {% if S.gaps %}<div class="stat"><div class="v serif">{{ S.gaps[0][0] }}<span>年</span></div><div class="k">最久的一次重逢</div></div>{% endif %}
+</div>
+
+<div style="align-self:center">{{ S.map_rev|safe }}</div>
+
+<div style="display:grid;grid-template-columns:480px 1fr;gap:48px">
+  <div>
+    <div class="h2">回去最多的城市<small>单位：趟</small></div>
+    {% set rmax = (S.ranking[0][0] if S.ranking else 1) %}
+    <div style="display:flex;flex-direction:column;gap:6px">{% for n, d, k in S.ranking %}
+      <div style="height:32px;display:grid;grid-template-columns:96px 1fr;align-items:center;gap:12px">
+        <span style="font-size:20px;font-weight:500;white-space:nowrap;overflow:hidden">{{ k }}</span>
+        <div style="display:flex;align-items:center;gap:10px"><div style="width:{{ (n / rmax * 300)|round|int }}px;height:16px;border-radius:3px;background:{{ S.bin_color(n) }}"></div><span style="font-size:17px;color:var(--soft)">{{ n }}</span></div>
+      </div>{% endfor %}
+    </div>
+  </div>
+  <div>
+    <div class="h2">省级行政区 · 去过几趟</div>
+    <div class="grid6">{% for n, p in S.prov_counts %}
+      {% if n %}<div class="cell" style="height:54px"><div class="n" style="font-size:17px"><i class="dot" style="width:8px;height:8px;background:{{ S.bin_color(n) }}"></i>{{ p }}</div><div class="d" style="font-size:14px;color:var(--soft)">{{ n }}</div></div>
+      {% else %}<div class="cell off" style="height:54px"><div class="n" style="font-size:17px">{{ p }}</div><div class="d" style="font-size:14px">0</div></div>{% endif %}
+    {% endfor %}</div>
+  </div>
+</div>
+
+<div>
+  <div style="display:flex;justify-content:space-between;align-items:baseline" class="h2"><span>每年出行 · 重访与新地方</span>
+    <span class="legend" style="font-size:16px"><span><i style="background:#daac50;border-radius:2px"></i>重访</span><span><i style="background:#4c8dd3;border-radius:2px"></i>全是新地方</span></span></div>
+  {% set mx = S.rev_years|map(attribute=2)|max %}
+  {% set bw = [32, (980 / S.rev_years|length * 0.6)|int]|min %}
+  <div class="bars" style="height:260px">{% for y, r, t in S.rev_years %}
+    <div class="bar"><span>{{ r }}/{{ t }}</span><div style="display:flex;flex-direction:column;border-radius:4px 4px 0 0;overflow:hidden">
+      {% if t - r %}<div style="width:{{ bw }}px;height:{{ ((t - r) / mx * 220)|round|int }}px;background:#4c8dd3"></div>{% endif %}
+      {% if r %}<div style="width:{{ bw }}px;height:{{ (r / mx * 220)|round|int }}px;background:#daac50"></div>{% endif %}
+    </div></div>{% endfor %}
+  </div>
+  <div class="axis">{% for y, r, t in S.rev_years %}<span>{{ y % 100 }}</span>{% endfor %}</div>
+  {% if S.newest_year %}<div class="small" style="font-size:17px;margin-top:12px">{{ S.newest_year[0] }} 年最「新」：{{ S.newest_year[2] }} 趟里 {{ S.newest_year[1] }} 趟全是没去过的地方</div>{% endif %}
+</div>
+
+{% if S.gaps %}
+<div>
+  <div class="h2">隔得最久的重逢</div>
+  <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px">{% for g, c, a, b in S.gaps %}
+    <div style="background:var(--card);border-radius:10px;padding:18px 16px 16px;display:flex;flex-direction:column;gap:8px">
+      <div class="serif" style="font-size:40px;line-height:1">{{ g }}<span style="font-size:18px"> 年</span></div>
+      <div style="font-size:20px;font-weight:500;white-space:nowrap;overflow:hidden">{{ c }}</div>
+      <div style="font-size:15px;color:var(--mute)">{{ a }} → {{ b }}</div></div>{% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<div style="display:flex;flex-direction:column;gap:22px;border-top:1px solid var(--line);padding-top:28px">
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px">
+    {% if S.abroad_top %}<div class="fact"><div class="k">国外去得最多</div><div class="v" style="font-size:23px">{{ S.abroad_top[0] }} {{ S.abroad_top[1] }} 趟</div></div>{% endif %}
+    <div class="fact"><div class="k">待得最久</div><div class="v" style="font-size:23px">{{ S.longest[0] }} {{ S.longest[1] }} 天</div></div>
+    {% if S.best_rev_year %}<div class="fact"><div class="k">重访最多的一年</div><div class="v" style="font-size:23px">{{ S.best_rev_year[0] }} · {{ S.best_rev_year[1] }} 趟</div></div>{% endif %}
+  </div>
+  <div class="foot">同一城市的区县已合并。一趟出行只要去了以前去过的城市，就算重访</div>
+</div>
+{% endblock %}
