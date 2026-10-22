@@ -26,7 +26,8 @@ def walk(root):
                 for e in it:
                     n = e.name
                     if e.is_dir(follow_symlinks=False):
-                        if not n.startswith(SKIP_DIR) and n not in SKIP_NAMES:
+                        if (not n.startswith(SKIP_DIR) or n == "@home") and n not in SKIP_NAMES \
+                                and not os.path.exists(os.path.join(e.path, "poster.db")):   # 跳过本工具自己的数据文件夹
                             stack.append(e.path)
                     elif e.is_file(follow_symlinks=False) and not n.startswith("._"):
                         ext = os.path.splitext(n)[1].lower()

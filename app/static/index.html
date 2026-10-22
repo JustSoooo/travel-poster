@@ -8,26 +8,36 @@
 :root { --bg:#f6f5f1; --card:#fff; --fg:#1d232b; --mute:#6b7380; --line:#e3e1db; --acc:#1f6feb; --ok:#1a7f4b; --warn:#b54708; }
 @media (prefers-color-scheme: dark) { :root { --bg:#10151c; --card:#18202b; --fg:#e9ecef; --mute:#9aa6b4; --line:#2b3646; --acc:#4c8dd3; --ok:#38b8a4; --warn:#f5aa42; } }
 * { box-sizing:border-box; }
-body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.6 -apple-system,"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",sans-serif; }
+body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.6 -apple-system,"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",sans-serif; }
 main { max-width:980px; margin:0 auto; padding:28px 16px 80px; }
-h1 { font-size:26px; margin:0 0 4px; }
-.lead { color:var(--mute); margin:0 0 24px; }
-section { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:20px; margin-bottom:18px; }
-section h2 { margin:0 0 6px; font-size:19px; display:flex; gap:10px; align-items:center; }
-.num { display:inline-flex; width:26px; height:26px; border-radius:50%; background:var(--acc); color:#fff; font-size:14px; align-items:center; justify-content:center; }
+h1 { font-size:28px; margin:0 0 4px; }
+.lead { color:var(--mute); margin:0 0 22px; }
+section { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:22px; margin-bottom:18px; }
+h2 { margin:0 0 6px; font-size:20px; }
 .hint { color:var(--mute); font-size:14px; margin:4px 0 14px; }
-button { font:inherit; padding:10px 18px; border-radius:8px; border:1px solid var(--acc); background:var(--acc); color:#fff; cursor:pointer; min-height:44px; }
+button { font:inherit; padding:10px 18px; border-radius:10px; border:1px solid var(--acc); background:var(--acc); color:#fff; cursor:pointer; min-height:44px; }
+button.big { font-size:20px; padding:16px 34px; min-height:60px; }
 button.ghost { background:none; color:var(--acc); }
 button:disabled { opacity:.5; cursor:default; }
-.bar { height:10px; background:var(--line); border-radius:5px; overflow:hidden; margin:12px 0 6px; }
+.bar { height:12px; background:var(--line); border-radius:6px; overflow:hidden; margin:16px 0 6px; }
 .bar > div { height:100%; background:var(--acc); width:0; transition:width .4s; }
-table { width:100%; border-collapse:collapse; font-size:14px; }
+.phase { font-size:15px; }
+.err { color:var(--warn); white-space:pre-wrap; font-size:14px; }
+.ok { color:var(--ok); font-weight:600; }
+.row { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+.folders { display:flex; flex-wrap:wrap; gap:6px; margin:6px 0 0; }
+.folders span { background:var(--bg); border:1px solid var(--line); border-radius:999px; padding:2px 10px; font-size:14px; }
+.posters { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:18px; }
+.posters figure { margin:0; text-align:center; font-size:15px; }
+.posters img { width:100%; border-radius:8px; border:1px solid var(--line); }
+details { margin-top:4px; }
+details > summary { cursor:pointer; font-size:17px; font-weight:600; padding:4px 0; }
+table { width:100%; border-collapse:collapse; font-size:14px; margin-top:10px; }
 th, td { text-align:left; padding:8px 6px; border-bottom:1px solid var(--line); vertical-align:top; }
 th { color:var(--mute); font-weight:500; }
 .seg { display:inline-flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; }
 .seg label { padding:6px 10px; cursor:pointer; font-size:13px; white-space:nowrap; }
 .seg input { display:none; }
-.seg input:checked + span { color:#fff; }
 .seg label:has(input:checked) { background:var(--acc); color:#fff; }
 .seg label.other:has(input:checked) { background:var(--warn); }
 .tag { font-size:12px; color:var(--mute); }
@@ -35,53 +45,51 @@ th { color:var(--mute); font-weight:500; }
 .samples { display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:8px; margin-top:8px; }
 .samples figure { margin:0; font-size:11px; color:var(--mute); }
 .samples img { width:100%; aspect-ratio:1; object-fit:cover; border-radius:6px; background:var(--line); }
-.posters { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
-.posters figure { margin:0; text-align:center; font-size:14px; }
-.posters img { width:100%; border-radius:8px; border:1px solid var(--line); }
-.row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-.folders { columns:2; font-size:14px; }
-.folders label { display:block; break-inside:avoid; padding:3px 0; }
+.fl { columns:2; font-size:14px; }
+.fl label { display:block; break-inside:avoid; padding:3px 0; }
 input[type=text] { font:inherit; width:100%; padding:6px 8px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--fg); }
-details summary { cursor:pointer; color:var(--acc); margin-top:10px; }
-.err { color:var(--warn); white-space:pre-wrap; font-size:13px; }
-@media (max-width:700px) { .posters { grid-template-columns:1fr; } .folders { columns:1; } th:nth-child(3), td:nth-child(3) { display:none; } }
+@media (max-width:700px) { .posters { grid-template-columns:1fr; } .fl { columns:1; } th:nth-child(3), td:nth-child(3) { display:none; } button.big { width:100%; } }
 </style>
 </head>
 <body>
 <main>
   <h1>旅行海报</h1>
-  <p class="lead">读取 NAS 里照片自带的拍摄时间和位置，生成「总海报 / 重访篇 / 年鉴篇」三张手机全屏海报。照片只读不改，不会上传到任何地方。</p>
+  <p class="lead">把照片里的拍摄时间和位置，变成三张手机全屏海报。照片只读不改，不上传到任何地方。</p>
 
-  <section id="s1">
-    <h2><span class="num">1</span>扫描照片</h2>
-    <div class="hint" id="roots"></div>
-    <div class="row"><button id="btnScan">开始扫描</button><span id="scanInfo" class="tag"></span></div>
-    <div class="bar"><div id="scanBar"></div></div>
-    <div class="tag" id="scanMsg"></div>
+  <section>
+    <h2>一键生成</h2>
+    <div class="hint" id="where"></div>
+    <div class="row">
+      <button class="big" id="btnGo">一键生成海报</button>
+      <label class="tag"><input type="checkbox" id="x2"> 同时生成 2 倍超清</label>
+    </div>
+    <div class="hint" style="margin-top:10px">第一次要读所有照片，十几万张大约 30–60 分钟。可以关掉这个网页，过一会儿再打开看；以后加了新照片再点一次，只读新增的，几分钟就好。</div>
+    <div class="bar"><div id="bar"></div></div>
+    <div class="phase" id="phase"></div>
+    <div class="err" id="err"></div>
+    <div class="posters" id="posters"></div>
+    <div class="row" style="margin-top:14px" id="dlRow" hidden>
+      <a href="/api/posters.zip"><button>全部下载</button></a>
+      <span class="tag">也可以点每张图下面的「下载」；手机上长按图片保存</span>
+    </div>
   </section>
 
-  <section id="s2">
-    <h2><span class="num">2</span>确认哪些设备是你的</h2>
-    <p class="hint">别人发给你的照片带着对方的位置，会把海报算错。逐台看一下：<b>我的</b> = 自己拍的；<b>同行</b> = 一起旅行的人拍的（只借位置，不算进数量）；<b>别人</b> = 别人发来的（完全不用）。系统已按规律预先选好，点「看样张」核对。</p>
-    <table><thead><tr><th>设备</th><th>数量 / 时间</th><th>说明</th><th>归属</th></tr></thead><tbody id="devBody"><tr><td colspan="4" class="tag">先完成第 1 步</td></tr></tbody></table>
-    <details><summary>排除某些文件夹（比如家人的照片、下载的图片）</summary>
-      <p class="hint">勾选的文件夹整个不参与计算。</p>
-      <div class="folders" id="folders"></div>
+  <section>
+    <details id="devBox">
+      <summary>海报里出现了没去过的地方？</summary>
+      <p class="hint">多半是别人微信、隔空投送发给你的照片，带着对方的位置。下面列出照片里出现过的所有手机和相机，系统已经猜好了，<b>只看橙色的那几台</b>：点「看样张」，不是你拍的就选「别人」。家人的照片如果放在单独的文件夹，在最下面勾掉。改完点「保存并重新生成」。</p>
+      <table><thead><tr><th>设备</th><th>数量 / 时间</th><th>说明</th><th>是谁的</th></tr></thead><tbody id="devBody"><tr><td colspan="4" class="tag">先点上面的「一键生成海报」</td></tr></tbody></table>
+      <details style="margin-top:12px"><summary style="font-size:15px">排除某些文件夹（比如家人的照片）</summary><div class="fl" id="folders"></div></details>
+      <div class="row" style="margin-top:14px"><button id="btnSaveDev">保存并重新生成</button><span id="devMsg" class="tag"></span></div>
     </details>
-    <div class="row" style="margin-top:14px"><button id="btnSaveDev">保存</button><span id="devMsg" class="tag"></span></div>
   </section>
 
-  <section id="s3">
-    <h2><span class="num">3</span>生成海报</h2>
-    <p class="hint">尺寸 1206×2622，正好是 iPhone 17 Pro 全屏；勾选「2 倍超清」会另外生成 2412×5244 的版本（慢一些）。</p>
-    <div class="row"><button id="btnGen">生成海报</button><label class="tag"><input type="checkbox" id="x2"> 2 倍超清</label><span id="genMsg" class="tag"></span></div>
-    <div class="err" id="genErr"></div>
-    <div class="posters" id="posters" style="margin-top:16px"></div>
-    <div class="row" style="margin-top:12px" id="dlRow" hidden><a id="dlZip" href="/api/posters.zip"><button class="ghost">全部打包下载</button></a></div>
-    <details id="tripBox"><summary>旅程名字不满意？在这里改</summary>
-      <p class="hint">改完点保存，再点一次「生成海报」。留空 = 用自动起的名字。</p>
+  <section>
+    <details id="tripBox">
+      <summary>旅程名字不满意？</summary>
+      <p class="hint">名字按地名和节假日自动起的。改完点保存，会自动重新生成。留空 = 用自动的名字。</p>
       <table><thead><tr><th>日期</th><th>天数</th><th>名字</th></tr></thead><tbody id="tripBody"></tbody></table>
-      <div class="row" style="margin-top:10px"><button id="btnSaveTrips">保存名字</button><span id="tripMsg" class="tag"></span></div>
+      <div class="row" style="margin-top:10px"><button id="btnSaveTrips">保存并重新生成</button><span id="tripMsg" class="tag"></span></div>
     </details>
   </section>
 </main>
@@ -89,46 +97,67 @@ details summary { cursor:pointer; color:var(--acc); margin-top:10px; }
 const $ = s => document.querySelector(s);
 const j = (u, o) => fetch(u, o).then(r => r.json());
 const post = (u, b) => j(u, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(b||{})});
-let devLoaded = false, lastGen = '';
+let lastGen = '', devLoaded = false;
 
 async function poll() {
-  const s = await j('/api/status');
-  $('#roots').textContent = s.roots.length ? `照片目录（${s.photo_root}）里的文件夹：${s.roots.join('、')}` : `没在 ${s.photo_root} 下找到文件夹，请检查 Docker 的存储挂载`;
-  const sc = s.scan;
-  $('#btnScan').disabled = sc.running;
-  $('#btnScan').textContent = sc.running ? '扫描中…' : (s.files ? '重新扫描（只读新增的）' : '开始扫描');
-  const pct = sc.total ? Math.round(sc.done / sc.total * 100) : (s.files ? 100 : 0);
-  $('#scanBar').style.width = pct + '%';
-  $('#scanInfo').textContent = s.files ? `已读取 ${s.files.toLocaleString()} 个文件（有拍摄时间 ${s.dated.toLocaleString()}，带 GPS ${s.gps.toLocaleString()}）${s.last_scan ? ' · 上次扫描 ' + s.last_scan : ''}` : '';
-  $('#scanMsg').textContent = sc.running ? `${sc.phase}：${sc.done.toLocaleString()} / ${sc.total.toLocaleString()}${sc.errors ? ' · 读取失败 ' + sc.errors : ''}` : (sc.msg || '');
-  if (!sc.running && s.files && !devLoaded) { devLoaded = true; loadDevices(); }
-  const g = s.gen;
-  $('#btnGen').disabled = g.running || !s.files;
-  $('#genMsg').textContent = g.running ? g.phase + '…（几分钟）' : (g.msg ? '完成：' + g.msg : (s.built ? '上次生成：' + s.built : ''));
-  $('#genErr').textContent = g.phase === '出错' ? g.msg : '';
+  let s;
+  try { s = await j('/api/status'); } catch (e) { setTimeout(poll, 5000); return; }
+  $('#where').innerHTML = s.roots.length
+    ? `会读取这些文件夹里的照片：<div class="folders">${s.roots.map(r => `<span>${esc(r)}</span>`).join('')}</div>`
+    : `<span class="err">没有找到照片文件夹。请按说明检查 Docker 项目的设置（照片文件夹那一行）。</span>`;
+  const sc = s.scan, g = s.gen, busy = sc.running || g.running;
+  $('#btnGo').disabled = busy || !s.roots.length;
+  $('#btnGo').textContent = busy ? '正在生成…' : (s.has_result ? '重新生成（会读新增的照片）' : '一键生成海报');
+  let pct = 0, msg = '';
+  if (sc.running) {
+    pct = sc.total ? Math.round(sc.done / sc.total * 85) : 3;
+    msg = sc.phase === '列出文件' ? `正在查找照片… 已找到 ${sc.total.toLocaleString()} 个` : `正在读取照片信息：${sc.done.toLocaleString()} / ${sc.total.toLocaleString()}`;
+  } else if (g.running) {
+    pct = g.phase === '生成海报' ? 95 : 90; msg = g.phase + '…';
+  } else if (g.phase === '完成' || (s.has_result && g.files.length)) {
+    pct = 100; msg = `<span class="ok">完成</span> · ${s.n_trips || ''} 趟旅程 · 读了 ${s.files.toLocaleString()} 个文件（带位置的 ${s.gps.toLocaleString()} 个）${s.built ? ' · ' + s.built : ''}`;
+  }
+  $('#bar').style.width = pct + '%';
+  $('#phase').innerHTML = msg;
+  $('#err').textContent = g.phase === '出错' ? '出错了：' + g.msg : (s.files && !s.gps && !busy ? '照片里都没有位置信息，没法算出去过哪里。' : '');
   const key = g.files.join('|');
-  if (!g.running && key && key !== lastGen) { lastGen = key; showPosters(g.files); loadTrips(); }
-  setTimeout(poll, sc.running || g.running ? 1500 : 5000);
+  if (!busy && key && key !== lastGen) { lastGen = key; showPosters(g.files); loadTrips(); devLoaded = false; }
+  if (!busy && s.files && !devLoaded && $('#devBox').open) { devLoaded = true; loadDevices(); }
+  setTimeout(poll, busy ? 1500 : 6000);
+}
+$('#devBox').addEventListener('toggle', () => { if ($('#devBox').open && !devLoaded) { devLoaded = true; loadDevices(); } });
+
+$('#btnGo').onclick = async () => { await post('/api/auto', {scale: $('#x2').checked ? 2 : 1}); lastGen = ''; setTimeout(poll, 500); };
+
+function showPosters(files) {
+  const t = Date.now();
+  $('#posters').innerHTML = files.filter(f => !f.includes('@2x')).map(f => {
+    const u = '/posters/' + encodeURIComponent(f), u2 = f.replace('.png', '@2x.png');
+    return `<figure><a href="${u}?t=${t}" target="_blank"><img src="${u}?t=${t}" alt="${esc(f)}"></a>
+      <figcaption>${esc(f.replace('.png',''))} · <a href="${u}?dl=1">下载</a>${files.includes(u2) ? ` · <a href="/posters/${encodeURIComponent(u2)}?dl=1">2 倍</a>` : ''}</figcaption></figure>`;
+  }).join('');
+  $('#dlRow').hidden = !files.length;
 }
 
 const OWN = [['me','我的'],['companion','同行'],['other','别人']];
 async function loadDevices() {
   const d = await j('/api/devices');
-  $('#devBody').innerHTML = d.devices.map((x, i) => {
+  const list = d.devices.slice().sort((a, b) => (b.suggest === 'other') - (a.suggest === 'other') || b.n - a.n);
+  $('#devBody').innerHTML = list.map((x, i) => {
     const cur = x.owner || x.suggest;
     const seg = OWN.map(([v, t]) => `<label class="${v}"><input type="radio" name="o${i}" value="${v}" ${cur===v?'checked':''}><span>${t}</span></label>`).join('');
-    return `<tr data-m="${encodeURIComponent(x.model)}"><td><b>${esc(x.model)}</b><br><span class="tag">${x.camera?'相机':''}</span></td>
+    return `<tr data-m="${encodeURIComponent(x.model)}"><td><b>${esc(x.model)}</b>${x.camera ? '<br><span class="tag">相机</span>' : ''}</td>
       <td>${x.n.toLocaleString()} 张<br><span class="tag">${x.first} ~ ${x.last}</span></td>
-      <td><span class="tag ${x.suggest==='other'?'warn':''}">建议：${x.suggest==='me'?'我的':'别人'}（${esc(x.why)}）${x.owner?'· 已确认':''}</span>
+      <td><span class="tag ${x.suggest==='other'?'warn':''}">${x.suggest==='me'?'看起来是你的':'可能是别人的'}（${esc(x.why)}）</span>
         <br><button class="ghost" style="padding:4px 10px;min-height:32px;margin-top:6px" onclick="samples(this, ${i})">看样张</button><div class="samples" id="sm${i}"></div></td>
       <td><span class="seg">${seg}</span></td></tr>`;
   }).join('') || '<tr><td colspan="4" class="tag">没有读到设备型号</td></tr>';
   $('#folders').innerHTML = d.folders.map(f => `<label><input type="checkbox" data-f="${encodeURIComponent(f.folder)}" ${f.excluded?'checked':''}> ${esc(f.folder)} <span class="tag">${f.n.toLocaleString()}</span></label>`).join('');
 }
 async function samples(btn, i) {
-  const m = decodeURIComponent(btn.closest('tr').dataset.m);
-  const box = $('#sm' + i);
+  const m = decodeURIComponent(btn.closest('tr').dataset.m), box = $('#sm' + i);
   if (box.innerHTML) { box.innerHTML = ''; return; }
+  box.innerHTML = '<span class="tag">加载中…</span>';
   const list = await j('/api/samples?model=' + encodeURIComponent(m));
   box.innerHTML = list.map(s => `<figure><img loading="lazy" src="${s.url}" alt=""><figcaption>${s.dt}<br>${esc(s.place||'无位置')}</figcaption></figure>`).join('') || '<span class="tag">没有可预览的照片</span>';
 }
@@ -137,28 +166,20 @@ $('#btnSaveDev').onclick = async () => {
   document.querySelectorAll('#devBody tr[data-m]').forEach(tr => { const c = tr.querySelector('input:checked'); if (c) owners[decodeURIComponent(tr.dataset.m)] = c.value; });
   document.querySelectorAll('#folders input').forEach(c => folders[decodeURIComponent(c.dataset.f)] = c.checked);
   await post('/api/devices', {owners, folders});
-  $('#devMsg').textContent = '已保存，下一步生成海报';
-  devLoaded = false; loadDevices(); devLoaded = true;
+  await post('/api/generate', {scale: $('#x2').checked ? 2 : 1});
+  $('#devMsg').textContent = '已保存，正在重新生成，看上面的进度'; lastGen = ''; window.scrollTo({top:0, behavior:'smooth'}); setTimeout(poll, 500);
 };
-$('#btnScan').onclick = async () => { await post('/api/scan'); devLoaded = false; poll(); };
-$('#btnGen').onclick = async () => { await post('/api/generate', {scale: $('#x2').checked ? 2 : 1}); lastGen = ''; poll(); };
-function showPosters(files) {
-  const t = Date.now();
-  $('#posters').innerHTML = files.filter(f => !f.includes('@2x')).map(f =>
-    `<figure><a href="/posters/${encodeURIComponent(f)}?t=${t}" target="_blank"><img src="/posters/${encodeURIComponent(f)}?t=${t}" alt="${esc(f)}"></a>
-     <figcaption>${esc(f.replace('.png',''))} · <a href="/posters/${encodeURIComponent(f)}?dl=1">下载</a>${files.includes(f.replace('.png','@2x.png')) ? ` · <a href="/posters/${encodeURIComponent(f.replace('.png','@2x.png'))}?dl=1">2 倍</a>` : ''}</figcaption></figure>`).join('');
-  $('#dlRow').hidden = false;
-}
 async function loadTrips() {
   const ts = await j('/api/trips');
   $('#tripBody').innerHTML = ts.slice().reverse().map(t => `<tr><td>${t.start}</td><td>${t.days}</td><td><input type="text" data-id="${t.id}" value="${esc(t.name===t.auto?'':t.name)}" placeholder="${esc(t.auto)}"></td></tr>`).join('');
 }
 $('#btnSaveTrips').onclick = async () => {
   const m = {}; document.querySelectorAll('#tripBody input').forEach(i => m[i.dataset.id] = i.value);
-  await post('/api/trips', m); $('#tripMsg').textContent = '已保存，点「生成海报」更新';
+  await post('/api/trips', m); await post('/api/generate', {scale: $('#x2').checked ? 2 : 1});
+  $('#tripMsg').textContent = '已保存，正在重新生成'; lastGen = ''; window.scrollTo({top:0, behavior:'smooth'}); setTimeout(poll, 500);
 };
 function esc(s) { return String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
-poll();
+poll(); loadTrips();
 </script>
 </body>
 </html>

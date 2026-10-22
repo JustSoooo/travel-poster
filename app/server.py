@@ -30,7 +30,8 @@ def status():
     n = con.execute("SELECT COUNT(*), SUM(dt IS NOT NULL), SUM(lat IS NOT NULL), SUM(kind='video') FROM files").fetchone()
     roots = []
     try:
-        roots = sorted(d for d in os.listdir(scan.PHOTO_ROOT) if not d.startswith("."))
+        roots = sorted(d for d in os.listdir(scan.PHOTO_ROOT) if not d.startswith((".", "@", "#"))
+                       and not os.path.exists(os.path.join(scan.PHOTO_ROOT, d, "data", "poster.db")))
     except OSError:
         pass
     res = analyze.load()
@@ -148,6 +149,27 @@ def _generate(scale):
         GEN.update(phase="出错", msg=f"{e}\n{traceback.format_exc()[-800:]}")
     finally:
         GEN["running"] = False
+
+
+def _auto(scale):
+    """一键：扫描（只读新增）→ 用系统建议的设备归属分析 → 出图"""
+    GEN.update(running=True, phase="扫描照片", msg="", files=[])
+    try:
+        scan.scan()
+        if scan.STATE.get("phase") == "出错":
+            raise RuntimeError("扫描出错：" + scan.STATE.get("msg", ""))
+    except Exception as e:
+        GEN.update(running=False, phase="出错", msg=str(e))
+        return
+    _generate(scale)
+
+
+@app.post("/api/auto")
+def auto():
+    if not GEN["running"] and not scan.STATE["running"]:
+        scale = int((request.get_json(silent=True) or {}).get("scale", 1))
+        threading.Thread(target=_auto, args=(scale,), daemon=True).start()
+    return jsonify(ok=True)
 
 
 @app.post("/api/generate")
