@@ -37,19 +37,19 @@ jobs:
         shell: bash
         run: |
           set +e
-          out=$(docker run -d --name t -p 8090:8090 $IMG:latest-${{ matrix.arch }} 2>&1); rc=$?
+          out=$(docker run -d --name tp-smoke -p 8090:8090 $IMG:latest-${{ matrix.arch }} 2>&1); rc=$?
           if [ $rc -ne 0 ]; then echo "::error::docker run 失败($rc): $out"; exit 1; fi
           ok=0
           for i in $(seq 1 40); do curl -sf localhost:8090/api/status >/dev/null && ok=1 && break; sleep 2; done
-          logs=$(docker logs t 2>&1 | tail -25 | tr '\n' ' ')
-          state=$(docker inspect -f '{{.State.Status}} exit={{.State.ExitCode}}' t)
+          logs=$(docker logs tp-smoke 2>&1 | tail -25 | tr '\n' ' ')
+          state=$(docker inspect -f '{{.State.Status}} exit={{.State.ExitCode}}' tp-smoke)
           if [ $ok -ne 1 ]; then echo "::error::服务没起来 [$state] $logs"; exit 1; fi
-          chk=$(docker exec t python -c "import render, analyze, poster; print('ok')" 2>&1); rc=$?
+          chk=$(docker exec tp-smoke python -c "import render, analyze, poster; print('ok')" 2>&1); rc=$?
           if [ $rc -ne 0 ]; then echo "::error::导入失败: $chk"; exit 1; fi
-          chk=$(docker exec t sh -c 'exiftool -ver && fc-list :lang=zh | head -1' 2>&1); rc=$?
+          chk=$(docker exec tp-smoke sh -c 'exiftool -ver && fc-list :lang=zh | head -1' 2>&1); rc=$?
           if [ $rc -ne 0 ]; then echo "::error::依赖缺失: $chk"; exit 1; fi
           echo "::notice::smoke ok [$state] $chk"
-          docker rm -f t
+          docker rm -f tp-smoke
       - name: push
         run: docker push $IMG:latest-${{ matrix.arch }}
       - name: export tar for offline import
