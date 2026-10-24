@@ -1,0 +1,25 @@
+{% extends "_base.html" %}
+{% block title %}一路走过{% endblock %}
+{% block body %}
+<div style="display:flex;flex-direction:column;gap:12px">
+  <div class="kicker">旅行档案 · 路线篇 · {{ S.y0 }}—{{ S.y1 }}</div>
+  <h1 class="serif" style="font-size:104px">一路走过</h1>
+  <div style="font-size:28px;color:var(--soft)">照片的位置按时间连起来，地面上走过的路</div>
+</div>
+{% if S.routes %}
+{% for r in S.routes %}
+<div style="display:flex;flex-direction:column;gap:16px">
+  <div style="display:flex;align-items:baseline;gap:18px;border-top:1px solid var(--line);padding-top:18px">
+    <span class="serif" style="font-size:40px">{{ r.name }}</span><span style="font-size:20px;color:var(--mute)">{{ r.sub }}</span>
+  </div>
+  <div style="width:1046px;height:{{ r.h }}px">{{ r.svg|safe }}</div>
+</div>
+{% endfor %}
+{% else %}
+<div style="font-size:28px;color:var(--mute);line-height:1.8">带位置的照片太少，连不出地面路线。<br>多用手机拍、或相机开了定位，下次就有了。</div>
+{% endif %}
+<div style="display:flex;justify-content:space-between;align-items:center;font-size:15px;color:var(--dim);border-top:1px solid var(--line);padding-top:14px">
+  <span>不含飞机航段；路线中间断开的地方，是那段路没有拍带位置的照片</span>
+  <span class="legend" style="font-size:15px">{% for y, c in S.year_colors %}{% if loop.first or loop.last %}<span><i style="background:{{ c }}"></i>{{ y }}</span>{% endif %}{% endfor %}</span>
+</div>
+{% endblock %}

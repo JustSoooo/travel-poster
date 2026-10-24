@@ -4,6 +4,8 @@ import collections, datetime as dt, html, math, os, re
 
 import numpy as np
 
+P = lambda s: dt.datetime.strptime(s, "%Y-%m-%d %H:%M:%S")
+
 from geo import ALL_PROV, COUNTRY_ZH, DOMESTIC, hav
 
 DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
@@ -261,4 +263,121 @@ def build(res, years_max=20):
     S["row_h"] = RH
     S["strip"] = strip_svg(S["yearly"], y0, RH)
     S["year_color"] = lambda y: year_color(y, y0, y1)
+    S["routes"] = routes(res, city, y0, y1)
     return S
+
+
+# ---------------------------------------------------------------- 路线篇
+def _fmt_km(km):
+    return f"约 {km / 10000:.1f} 万公里" if km >= 10000 else f"约 {int(round(km, -1)):,} 公里"
+
+
+def route_svg(W, H, ext, lines, labels, y0, y1):
+    """等距圆柱投影 + 按纬度压缩经度（cos φ）。lines: [(年份, [(lat, lon), ...])]；labels: [(lat, lon, 文字, 是否主要)]"""
+    lo0, lo1, la0, la1 = ext
+    k = math.cos(math.radians((la0 + la1) / 2))
+    s = W / ((lo1 - lo0) * k)
+    xy = lambda la, lo: ((lo - lo0) * k * s, (la1 - la) * s)
+    step = max(0.06, (la1 - la0) / (H / 9))      # 陆地点阵大约 9px 一个（数据精度 0.25°，小范围时点会成块）
+    M = land(); o = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" role="img" aria-label="地面路线点阵图">']
+    dots, lat = [], la1 - step / 2
+    r = max(1.2, min(2.0, step * s * 0.28))
+    while lat > la0:
+        row = int((90 - lat) / 0.25); lon = lo0 + step / k / 2
+        while lon < lo1:
+            L = ((lon + 180) % 360) - 180
+            if 0 <= row < 720 and M[row, int((L + 180) / 0.25) % 1440]:
+                x, y = xy(lat, lon); dots.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{r:.1f}"/>')
+            lon += step / k
+        lat -= step
+    o.append('<g fill="#2B3646">' + "".join(dots) + "</g>")
+    o.append('<g fill="none" stroke-linecap="round" stroke-linejoin="round">')
+    for yr, pts in sorted(lines, key=lambda x: x[0]):
+        d = " ".join(f"{'M' if i == 0 else 'L'}{x:.1f},{y:.1f}" for i, (x, y) in enumerate(xy(a, b) for a, b in pts))
+        o.append(f'<path d="{d}" stroke="{year_color(yr, y0, y1)}" stroke-width="2.6" stroke-opacity="0.85"/>')
+    o.append("</g>")
+    boxes = []
+    for la, lo, text, main in labels:
+        x, y = xy(la, lo); size = 18; w = len(text) * size + 4; h = size + 6
+        if not (0 <= x <= W and 0 <= y <= H):
+            continue
+        for dx, anchor in ((9, "start"), (-9, "end")):
+            bx = x + dx if anchor == "start" else x + dx - w
+            box = (bx, y - h / 2, bx + w, y + h / 2)
+            if box[0] < 2 or box[2] > W - 2 or box[1] < 2 or box[3] > H - 2:
+                continue
+            if any(not (box[2] < b[0] or box[0] > b[2] or box[3] < b[1] or box[1] > b[3]) for b in boxes):
+                continue
+            boxes.append(box)
+            o.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="3.5" fill="#E9ECEF"/>'
+                     f'<text x="{x + dx:.1f}" y="{y + size * 0.36:.1f}" font-size="{size}" fill="{"#E9ECEF" if main else "#C5CDD6"}" '
+                     f'text-anchor="{anchor}" font-family="Noto Sans CJK SC, PingFang SC, sans-serif">{esc(text)}</text>')
+            break
+    o.append("</svg>")
+    return "".join(o)
+
+
+def routes(res, city, y0, y1, W=1046, budget=1880, max_panels=3):
+    """把每趟旅程的轨迹按时间连起来，只留地面段（≤250 公里、≤20 小时、时速 ≤130 公里），按国家分图"""
+    days = res["days"]; tmap = {t["id"]: t for t in res["trips"]}
+    region = lambda cc: "CN" if cc in DOMESTIC else cc
+    segs = collections.defaultdict(list); km = collections.Counter(); rtrips = collections.defaultdict(set)
+    for tid, pts in res.get("tracks", {}).items():
+        line, cur_r = [], None
+        for (a1, o1, t1), (a2, o2, t2) in zip(pts, pts[1:]):
+            c1 = region((days.get(t1[:10]) or {}).get("cc") or ""); c2 = region((days.get(t2[:10]) or {}).get("cc") or "")
+            d = hav(a1, o1, a2, o2); h = abs((P(t2) - P(t1)).total_seconds()) / 3600
+            ok = c1 and c1 == c2 and d <= 250 and h <= 20 and d / max(h, 0.05) <= 130
+            if ok and cur_r == c1 and line:
+                line.append((a2, o2))
+            else:
+                if len(line) >= 2:
+                    segs[cur_r].append((int(tid[1:5]), line))
+                line, cur_r = ([(a1, o1), (a2, o2)], c1) if ok else ([], None)
+            if ok:
+                km[c1] += d; rtrips[c1].add(tid)
+        if len(line) >= 2:
+            segs[cur_r].append((int(tid[1:5]), line))
+    pick = []
+    if km.get("CN", 0) >= 200:
+        pick.append("CN")
+    pick += [c for c, v in km.most_common() if c != "CN" and v >= 150][:max_panels - len(pick)]
+    panels = []
+    for r in pick:
+        pts = [p for _, ln in segs[r] for p in ln]
+        las = sorted(p[0] for p in pts); los = sorted(p[1] for p in pts)
+        q = lambda a, f: a[min(len(a) - 1, int(f * len(a)))]
+        la0, la1, lo0, lo1 = q(las, 0.005), q(las, 0.995), q(los, 0.005), q(los, 0.995)
+        k = math.cos(math.radians((la0 + la1) / 2))
+        span_lo = max(lo1 - lo0, 1.2 / k); span_la = max(la1 - la0, 1.2)
+        lo0 -= span_lo * 0.08; lo1 += span_lo * 0.08; la0 -= span_la * 0.1; la1 += span_la * 0.1
+        nat = W * (la1 - la0) / ((lo1 - lo0) * k)
+        panels.append(dict(r=r, ext=[lo0, lo1, la0, la1], k=k, nat=nat))
+    if not panels:
+        return []
+    hs = [min(max(p["nat"], 400), 760) for p in panels]
+    f = min(1, budget / sum(hs)) if hs else 1
+    out = []
+    for p, h in zip(panels, hs):
+        H = int(max(280, h * f)); lo0, lo1, la0, la1 = p["ext"]; k = p["k"]
+        need_la = H * (lo1 - lo0) * k / W                   # 按画布比例补齐
+        if need_la > la1 - la0:
+            c = (la0 + la1) / 2; la0, la1 = c - need_la / 2, c + need_la / 2
+        else:
+            need_lo = W * (la1 - la0) / (H * k); c = (lo0 + lo1) / 2; lo0, lo1 = c - need_lo / 2, c + need_lo / 2
+        ext = (lo0, lo1, la0, la1)
+        inside = lambda v: lo0 <= v["lon"] <= lo1 and la0 <= v["lat"] <= la1 and region(v["cc"]) == p["r"]
+        cs = [(k_, v) for k_, v in city.items() if inside(v) and re.search(r"[一-鿿]", k_)]
+        labs = [(v["lat"], v["lon"], k_, True) for k_, v in sorted(cs, key=lambda kv: -kv[1]["days"])[:7]]
+        if cs:
+            for fn in (lambda kv: kv[1]["lat"], lambda kv: -kv[1]["lat"], lambda kv: kv[1]["lon"], lambda kv: -kv[1]["lon"]):
+                k_, v = max(cs, key=fn)
+                if all(hav(v["lat"], v["lon"], l[0], l[1]) > 150 for l in labs):
+                    labs.append((v["lat"], v["lon"], k_, False))
+        ts = sorted(rtrips[p["r"]], key=lambda t: tmap[t]["start"]) if rtrips[p["r"]] else []
+        if len(ts) == 1:
+            sub = f"{_fmt_km(km[p['r']])} · {tmap[ts[0]]['name']}"
+        else:
+            sub = f"{_fmt_km(km[p['r']])} · {len(ts)} 趟出行"
+        out.append(dict(name=COUNTRY_ZH.get(p["r"], p["r"]), sub=sub, h=H, svg=route_svg(W, H, ext, segs[p["r"]], labs, y0, y1)))
+    return out

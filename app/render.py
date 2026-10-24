@@ -8,7 +8,7 @@ import analyze, db, poster
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(db.DATA_DIR, "posters")
-POSTERS = [("main", "总海报"), ("revisit", "重访篇"), ("yearly", "年鉴篇")]
+POSTERS = [("main", "总海报"), ("revisit", "重访篇"), ("yearly", "年鉴篇"), ("routes", "路线篇")]
 env = Environment(loader=FileSystemLoader(os.path.join(HERE, "templates")), autoescape=select_autoescape(["html"]))
 _lock = threading.Lock()
 
@@ -24,7 +24,7 @@ def html_all():
 
 
 def png_all(scale=1):
-    """生成三张 PNG（1206×2622，iPhone 17 Pro 全屏；scale=2 时为 2412×5244）"""
+    """生成四张 PNG（1206×2622，iPhone 17 Pro 全屏；scale=2 时为 2412×5244）"""
     pages = html_all()
     if not pages:
         return []

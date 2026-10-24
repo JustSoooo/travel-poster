@@ -1,0 +1,36 @@
+name: cli
+
+# 终端版：在真的 Mac（Apple 芯片）和 Linux 上从零跑一遍 tp.sh，用假照片出四张海报
+on:
+  push:
+    branches: [main]
+    paths: ["app/**", "tp.sh", "requirements-cli.txt", "tests/**", ".github/workflows/cli.yml"]
+  workflow_dispatch:
+
+jobs:
+  cli:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-14, ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: 第一次运行（装环境；空文件夹会提示没照片）
+        run: |
+          mkdir -p "$RUNNER_TEMP/empty"
+          bash tp.sh "$RUNNER_TEMP/empty" || true
+          ls ~/.travel-poster
+      - name: 造假照片
+        run: |
+          ET=$(command -v exiftool || echo ~/.travel-poster/exiftool/exiftool)
+          EXIFTOOL=$ET ~/.travel-poster/venv/bin/python tests/make_sample.py "$RUNNER_TEMP/照片硬盘/照片"
+      - name: 一键生成
+        run: |
+          bash tp.sh "$RUNNER_TEMP/照片硬盘"
+          ls -la ~/Desktop/旅行海报
+          test $(ls ~/Desktop/旅行海报/*.png | wc -l) -eq 8
+      - uses: actions/upload-artifact@v4
+        with:
+          name: posters-${{ matrix.os }}
+          path: ~/Desktop/旅行海报/*.png

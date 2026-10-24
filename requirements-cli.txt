@@ -1,0 +1,9 @@
+# 终端版用（不需要 flask / waitress）
+jinja2>=3.1
+numpy>=1.26
+pillow>=10
+pillow-heif>=0.18
+playwright>=1.47
+lunardate>=0.2.2
+opencc-python-reimplemented>=0.1.7
+pypinyin>=0.53
